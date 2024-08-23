@@ -1,2 +1,7 @@
-Prueba de funconalidad del git
-Prueba #2
+Curso: Lenguajes de Programación
+II Semestre, 2024
+Estudiante: Mary Paz Álvarez Navarrete
+Carnet: 2023138604
+Proyecto #1
+Fecha de entrega: 02/09/24
+Estatus de la entrega: Por definir
