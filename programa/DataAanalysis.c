@@ -406,7 +406,7 @@ void importData() {
         cleanBuffer();
         printf("\n");
 
-        if(o == 'I') {
+        if(o == 'A') {
             char *path = NULL;
             size_t size = 0;
             bool load  = true;
