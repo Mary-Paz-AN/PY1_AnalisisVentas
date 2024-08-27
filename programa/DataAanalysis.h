@@ -18,22 +18,41 @@ typedef struct
     char *productName;
     char *category;
     int quantity;
-    float unitPrice;
-    float total;
+    int unitPrice;
+    int total;
 } Sale;
+
+typedef struct 
+{
+    char *month;
+    int totalMonth;
+} MonthlyReport;
+
+typedef struct 
+{
+    char *year;
+    MonthlyReport reportM;
+    int totalYear;
+} YearlyReport;
 
 // Global variables
 extern Sale **sales;
+extern MonthlyReport **reportM;
+extern YearlyReport **reportY;
 extern int numSales;
+extern int numYearly;
+extern int numMonthly;
 
 // Function prototypes
-int loadMemory(char *path, int mode);
 void cleanMemorySales();
 void cleanMemoryJson(cJSON *json, char *contentFile);
 void cleanBuffer();
+int loadMemory(char *path, int mode);
 void menu();
 void importData();
 void processData();
+int totalSales();
+void monthlyYearlySales();
 void analyzeData();
 void temporalAnalysis();
 void estadistic();

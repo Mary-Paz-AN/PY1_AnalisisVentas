@@ -271,12 +271,12 @@ int loadMemory(char *path, int mode) {
         cJSON *unitPrice = cJSON_GetObjectItem(item, "precio_unitario");
         if(cJSON_IsNumber(unitPrice)) {
             if(mode == 1) {
-                if(unitPrice->valuedouble == 0.0) {
+                if(unitPrice->valueint == 0) {
                     printf("En la venta con el id %d hace falta el precio unitario\n", saleId->valueint);
                 }
             }
 
-            sale->unitPrice = unitPrice->valuedouble;
+            sale->unitPrice = unitPrice->valueint;
 
         } else {
             if(mode == 0) {
@@ -288,7 +288,7 @@ int loadMemory(char *path, int mode) {
                 return false;
             } else {
                 printf("En la venta con el id %d hace falta el precio unitario\n", saleId->valueint);
-                sale->unitPrice = 0.0;
+                sale->unitPrice = 0;
             }
         }
 
@@ -296,12 +296,12 @@ int loadMemory(char *path, int mode) {
         cJSON *total = cJSON_GetObjectItem(item, "total");
         if(cJSON_IsNumber(total)) {
             if(mode == 1) {
-                if(total->valuedouble == 0.0) {
+                if(total->valueint == 0) {
                     printf("En la venta con el id %d hace falta el total\n", saleId->valueint);
                 }
             }
             
-            sale->total = total->valuedouble;
+            sale->total = total->valueint;
         } else {
             if(mode == 0) {
                 fprintf(stderr, "Ocurri%c un error al leer el tipo de dato de total\n", 162);
@@ -312,7 +312,7 @@ int loadMemory(char *path, int mode) {
                 return false;
             } else {
                 printf("En la venta con el id %d hace falta el total\n", saleId->valueint);
-                sale->total = 0.0;
+                sale->total = 0;
             }
 
         }
@@ -398,7 +398,7 @@ void importData() {
     while(continueImport == true) {
         char o;
 
-        printf("I: Importar datos\n");
+        printf("A: Importar datos\n");
         printf("V: Volver\n");
         printf("Escriba la opci%cn deseada:\n", 162);
         
@@ -460,8 +460,62 @@ void processData() {
     printf("Esto es una opcion");
 }
 
+//Calculates the total of sales
+int totalSales() {
+    int total = 0;
+
+    //Iterates the sales array to find the totalof each sale
+    for(int i = 0; i < numSales; i++) {
+        total += sales[i]->total;
+    }
+
+    return total;
+}
+
+//Calculates the total of sales made monthly and yearly
+void monthlyYearlySales() {
+    
+}
+
+//Makes different statistical analyses of sales
 void analyzeData() {
-    printf("Esto es una opcion");
+    char o;
+    int totalSale = 0;
+
+    //Submenu for the option
+    printf("A: Ver total de ventas\n");
+    printf("B: Ver total de ventas mensaulaes y anuales\n");
+    printf("V: Volver\n");
+    printf("Escriba la opci%cn deseada:\n", 162);
+    
+    o = toupper(getchar());
+    cleanBuffer();
+    printf("\n");
+
+    //Switch to access to the diferent options
+    switch (o)
+    {
+    case 'A':
+        totalSale = totalSales();
+        printf("Total de las ventas importadas: %d\n\n", totalSale);
+        analyzeData();
+        break;
+    
+    case 'B':
+        monthlyYearlySales();
+        analyzeData();
+        break;
+
+    case 'V':
+        menu();
+        break;
+
+    default:
+        printf("Opci%cn Invalida. Porfavor vuelva a intentarlo.\n\n", 162);
+        analyzeData();
+        break;
+    }
+
 }
 
 void temporalAnalysis() {
