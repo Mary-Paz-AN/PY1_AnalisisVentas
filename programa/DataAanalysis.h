@@ -24,38 +24,40 @@ typedef struct
 
 typedef struct 
 {
-    char *month;
+    int month;
     int totalMonth;
 } MonthlyReport;
 
 typedef struct 
 {
-    char *year;
-    MonthlyReport reportM;
+    int year;
+    MonthlyReport *months;
+    int monthCounter;
     int totalYear;
 } YearlyReport;
 
 // Global variables
 extern Sale **sales;
-extern MonthlyReport **reportM;
-extern YearlyReport **reportY;
+extern YearlyReport **years;
 extern int numSales;
 extern int numYearly;
-extern int numMonthly;
 
-// Function prototypes
+//Program Functions
+//Memory associate functions
 void cleanMemorySales();
+void cleanMemoryReports();
 void cleanMemoryJson(cJSON *json, char *contentFile);
-void cleanBuffer();
 int loadMemory(char *path, int mode);
+void cleanBuffer();
 void menu();
 void importData();
 void processData();
 int totalSales();
-void monthlyYearlySales();
+bool monthlyYearlySales();
+void printReport();
 void analyzeData();
 void temporalAnalysis();
 void estadistic();
 void exitProgram();
 
-#endif 
+#endif

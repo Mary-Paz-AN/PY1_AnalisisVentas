@@ -1,8 +1,10 @@
-#include "DataAanalysis.h"
+#include "DataAanalysis.h"s
 
 // Global variables
 Sale **sales;
+YearlyReport **years;
 int numSales = 0;
+int numYearly = 0;
 
 //Main function
 int main() {
@@ -22,7 +24,7 @@ int main() {
     return 0;
 }
 
-//Functions
+//Memory associate
 //Cleans the memory assigned to the sales array
 void cleanMemorySales() {
     for (int i = 0; i < numSales; i++) {
@@ -33,6 +35,18 @@ void cleanMemorySales() {
     }
 
     free(sales);
+}
+
+//Cleans the memory assigned to the YearlyReport
+void cleanMemoryReports() {
+    //Yeraly Report
+    for(int i = 0; i < numYearly; i++) {
+        free(years[i]->months);
+        free(years[i]);
+    }
+
+    free(years);
+    years =NULL;
 }
 
 //Cleans the momory thats been assigned if an error occurs
@@ -473,14 +487,220 @@ int totalSales() {
 }
 
 //Calculates the total of sales made monthly and yearly
-void monthlyYearlySales() {
-    
+bool monthlyYearlySales() {
+    //If the structures are not empty free the memory and restart the counters
+    if(years != NULL) {
+        cleanMemoryReports();
+        numYearly = 0;
+    }
+
+    //Reserve memory for the structures
+    years = malloc(1 * sizeof(YearlyReport*));
+    if(years == NULL) {
+        printf("Ocurri%c un erorr a asignar memoria.\n", 162);
+        printf("Porfavor vuelva a intentarlo.\n");
+        return false;
+    }
+
+    //Save the data in the structures
+    //Iterates each sale to find the years and months
+    for(int i = 0; i < numSales; i++) {
+        bool yearExists = false;
+        int yearIndex = 0;
+
+        //Extract the year from the date and converts the string to int
+        int yearInt = atoi(sales[i]->date);
+
+        for(int j = 0; j < numYearly; j++) {
+            //Verify if the year was already add to the array of years
+            if(yearInt == years[j]->year) {
+                yearExists = true;
+                yearIndex = j;
+                break;
+            }
+        }
+
+        //Adds the year if wasn´t in years
+        if(!yearExists) {
+            //Reallocate memory for the array
+            YearlyReport **tempYears = realloc(years, (numYearly + 1) * sizeof(YearlyReport*));
+            if (tempYears == NULL) {
+                printf("Ocurrió un error al reasignar memoria.\n");
+                printf("Por favor vuelva a intentarlo.\n");
+                return false;
+            }
+
+            years = tempYears;
+            
+            //Assigned memory for the structure
+            years[numYearly] = malloc(sizeof(YearlyReport));
+            if (years[numYearly] == NULL) {
+                printf("Ocurrió un error al asignar memoria.\n");
+                printf("Por favor vuelva a intentarlo.\n");
+                return false;
+            }
+
+            //Initialize the data
+            yearIndex = numYearly;
+            years[yearIndex]->year = yearInt;
+            years[yearIndex]->months = NULL;
+            years[yearIndex]->monthCounter = 0;
+            years[yearIndex]->totalYear = 0;
+            numYearly++;
+        }
+
+        bool monthExist = false;
+        int numMonths =years[yearIndex]->monthCounter;
+        int monthIndex = 0;
+
+        //Extract the month from the date and converts striing to int
+        int monthInt = atoi(sales[i]->date + 5);
+
+        //Verify if the month was already add
+        for(int j = 0; j < numMonths; j++) {
+            //Verify if the year was already add to the array of years
+            if(monthInt == years[yearIndex]->months[j].month) {
+                monthExist = true;
+                monthIndex = j;
+                break;
+            }
+        }
+
+        //Adds the year if wasn´t in years
+        if(!monthExist) {
+            //Reallocate memory for the array
+            MonthlyReport *tempMonths = realloc(years[yearIndex]->months, (numMonths + 1) * sizeof(MonthlyReport));
+            if (tempMonths == NULL) {
+                printf("Ocurrió un error al reasignar memoria para los meses.\n");
+                printf("Por favor vuelva a intentarlo.\n");
+                return false;
+            }
+
+            years[yearIndex]->months = tempMonths;
+
+            //Adds data to the month array
+            monthIndex = numMonths; 
+            years[yearIndex]->months[monthIndex].month = monthInt;
+            years[yearIndex]->months[monthIndex].totalMonth = 0;
+            years[yearIndex]->monthCounter += 1;
+        }
+
+        //Adds the total made per month and year
+        years[yearIndex]->months[monthIndex].totalMonth += sales[i]->total;
+        years[yearIndex]->totalYear += sales[i]->total;
+    }
+
+    return true;
+}
+
+//Prints the sale made monthly and yearly
+void printReport () {
+    printf("------------------------------------------------\n");
+    printf("An%clisis de ventas hechas mensual y anualmente\n", 160);
+    //Iterates the array of years
+    for(int i = 0; i < numYearly; i++) {
+        printf("------------------------------------------------\n");
+
+        //Year
+        printf("A%co %d\n", 164, years[i]->year);
+
+        //Months
+        for(int j = 0; j < years[i]->monthCounter; j++) {
+            MonthlyReport *monthReport = &(years[i]->months[j]);
+
+            //Switch month names
+            char *monthName;
+            switch (monthReport->month)
+            {
+            case 1:
+                monthName = malloc(strlen("Enero") * sizeof(char));
+                strcpy(monthName, "Enero");
+                break;
+
+            case 2:
+                monthName = malloc(strlen("Febrero") * sizeof(char));
+                strcpy(monthName, "Febrero");
+                break;
+
+            case 3:
+                monthName = malloc(strlen("Marzo") * sizeof(char));
+                strcpy(monthName, "Marzo");
+                break;
+
+            case 4:
+                monthName = malloc(strlen("Abril") * sizeof(char));
+                strcpy(monthName, "Abril");
+                break;
+
+            case 5:
+                monthName = malloc(strlen("Mayo") * sizeof(char));
+                strcpy(monthName, "Mayo");
+                break;
+
+            case 6:
+                monthName = malloc(strlen("Junio") * sizeof(char));
+                strcpy(monthName, "Junio");
+                break;
+            
+            case 7:
+                monthName = malloc(strlen("Julio") * sizeof(char));
+                strcpy(monthName, "Julio");
+                break;
+
+            case 8:
+                monthName = malloc(strlen("Agosto") * sizeof(char));
+                strcpy(monthName, "Agosto");
+                break;
+
+            case 9:
+                monthName = malloc(strlen("Septiembre") * sizeof(char));
+                strcpy(monthName, "Septiembre");
+                break;
+
+            case 10:
+                monthName = malloc(strlen("Octubre") * sizeof(char));
+                strcpy(monthName, "Octubre");
+                break;
+
+            case 11:
+                monthName = malloc(strlen("Noviembre") * sizeof(char));
+                strcpy(monthName, "Noviembre");
+                break;
+
+            case 12:
+                monthName = malloc(strlen("Diciembre") * sizeof(char));
+                strcpy(monthName, "Diciembre");
+                break;
+            
+            default:
+                break;
+            }
+
+            //Prints the month and the total per month
+            printf("  %s: %d\n", monthName, monthReport->totalMonth);
+
+            free(monthName);
+        }
+
+        printf("Total: %d\n", years[i]->totalYear);
+    }
+
+    printf("------------------------------------------------\n");
+    printf("\n");
 }
 
 //Makes different statistical analyses of sales
 void analyzeData() {
+    //Verify if there are any import in memory
+    if(sales == NULL) {
+        printf("Todavia no hay importaciones en memoria.\n");
+        printf("Haga una y vuelva a intentarlo.\n");
+        menu();
+    }
+
     char o;
     int totalSale = 0;
+    bool laoadData;
 
     //Submenu for the option
     printf("A: Ver total de ventas\n");
@@ -502,7 +722,8 @@ void analyzeData() {
         break;
     
     case 'B':
-        monthlyYearlySales();
+        laoadData = monthlyYearlySales();
+        if(laoadData){ printReport(); }
         analyzeData();
         break;
 
@@ -593,6 +814,7 @@ void exitProgram() {
     //Cleans memory
     free(jsonString);
     cJSON_Delete(jsonArray);
+    cleanMemoryReports();
     cleanMemorySales();
 
     printf("ESTA SALEINDO...");
