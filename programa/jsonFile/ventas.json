@@ -3,7 +3,7 @@
 		"fecha":	"2023-01-04",
 		"producto_id":	109,
 		"producto_nombre":	"Cámara",
-		"categoria":	"Electrónica",
+		"categoria":	"Mascotas",
 		"cantidad":	2,
 		"precio_unitario":	250,
 		"total":	500
@@ -12,7 +12,7 @@
 		"fecha":	"2023-01-12",
 		"producto_id":	106,
 		"producto_nombre":	"Teléfono",
-		"categoria":	"Electrónica",
+		"categoria":	"Casa",
 		"cantidad":	1,
 		"precio_unitario":	500,
 		"total":	500
@@ -39,7 +39,7 @@
 		"fecha":	"2024-01-12",
 		"producto_id":	106,
 		"producto_nombre":	"Teléfono",
-		"categoria":	"Electrónica",
+		"categoria":	"Cocina",
 		"cantidad":	1,
 		"precio_unitario":	250,
 		"total":	500
@@ -48,7 +48,7 @@
 		"fecha":	"2024-05-12",
 		"producto_id":	106,
 		"producto_nombre":	"Teléfono",
-		"categoria":	"Electrónica",
+		"categoria":	"Carros",
 		"cantidad":	1,
 		"precio_unitario":	500,
 		"total":	500

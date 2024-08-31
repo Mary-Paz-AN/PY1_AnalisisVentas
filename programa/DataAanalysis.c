@@ -1,10 +1,12 @@
-#include "DataAanalysis.h"s
+#include "DataAanalysis.h"
 
 // Global variables
 Sale **sales;
 YearlyReport **years;
+Category **categories;
 int numSales = 0;
 int numYearly = 0;
+int numCategories = 0;
 
 //Main function
 int main() {
@@ -24,7 +26,6 @@ int main() {
     return 0;
 }
 
-//Memory associate
 //Cleans the memory assigned to the sales array
 void cleanMemorySales() {
     for (int i = 0; i < numSales; i++) {
@@ -47,6 +48,17 @@ void cleanMemoryReports() {
 
     free(years);
     years =NULL;
+}
+
+//Cleans the memory assigned to the Category
+void cleanMemoryCategories() {
+    for(int i = 0; i < numCategories; i++) {
+        free(categories[i]->name);
+        free(categories[i]);
+    }
+
+    free(categories);
+    categories =NULL;
 }
 
 //Cleans the momory thats been assigned if an error occurs
@@ -693,7 +705,7 @@ void printReport () {
 void analyzeData() {
     //Verify if there are any import in memory
     if(sales == NULL) {
-        printf("Todavia no hay importaciones en memoria.\n");
+        printf("Todav%ca no hay importaciones en memoria.\n", 161);
         printf("Haga una y vuelva a intentarlo.\n");
         menu();
     }
@@ -743,8 +755,171 @@ void temporalAnalysis() {
     printf("Esto es una opcion");
 }
 
+//Prints the top 5 categories 
+void printCategories() {
+    //If the number of categories is less than 5 then just print numCategories
+    printf("Top %d categor%cas m%cs vendidas\n", (numCategories >= 5 ? 5 : numCategories), 161, 160);
+    printf("-------------------------------\n");
+
+    for (int i = 0; i < (numCategories >= 5 ? 5 : numCategories); i++) {
+        printf("%d. %s: %d\n", (i + 1), categories[i]->name, categories[i]->total);
+    }
+
+    printf("\n");
+}
+
+//Swap the categories
+void swap(Category *a, Category *b) {
+    //Temporal variable to save a data
+    Category t = *a;
+
+    //Copy the values
+    *a = *b;
+    *b = t;
+}
+
+//Reorders the aray with a pivot
+int partition(int low, int high) {
+    //The pivot that would be use is the total of the last element
+    int pivot = categories[high]->total;
+    int i = low - 1;
+
+    //Compares the value with the pivot
+    for(int j = low; j < high; j++) {
+        if(categories[j]->total > pivot) {
+            i++;
+            swap(categories[i], categories[j]);
+        }
+    }
+
+    //Place the pivot in it´s final position
+    swap(categories[i + 1], categories[high]);
+    return i +1;
+}
+
+//Ordes the category array from more earn to less earn with QuickSort
+void quickSort(int low, int high) {
+    if(low <high) {
+        int index = partition(low, high);
+
+        //Orders the left sublist
+        quickSort(low, index -1);
+
+        //Orders the rigth sublist
+        quickSort(index + 1, high);
+    }
+}
+
+//Creates a array to know the total for each category
+bool salesXCategory() {
+    //If the structures are not empty free the memory and restart the counters
+    if(categories != NULL) {
+        cleanMemoryCategories();
+        numCategories = 0;
+    }
+
+    //Reserve memory for the structures
+    categories = malloc(1 * sizeof(Category*));
+    if(categories == NULL) {
+        printf("Ocurri%c un erorr a asignar memoria.\n", 162);
+        printf("Porfavor vuelva a intentarlo.\n");
+        return false;
+    }
+
+    //Save the data in the structures
+    //Iterates each sale to find the categories
+    for(int i = 0; i < numSales; i++) {
+        bool categoryExist = false;
+        int categoryIndex = 0;
+
+        for(int j = 0; j < numCategories; j++) {
+            //Verify if the category was already add to the array of categories
+            if(strcmp(sales[i]->category, categories[j]->name) == 0) {
+                categoryExist = true;
+                categoryIndex = j;
+                break;
+            }
+        }
+
+        //Adds the year if wasn´t in years
+        if(!categoryExist) {
+            //Reallocate memory for the array
+            Category **tempCategories = realloc(categories, (numCategories + 1) * sizeof(Category*));
+            if (tempCategories == NULL) {
+                printf("Ocurrió un error al reasignar memoria.\n");
+                printf("Por favor vuelva a intentarlo.\n");
+                return false;
+            }
+
+            categories = tempCategories;
+            
+            //Assigned memory for the structure
+            categories[numCategories] = malloc(sizeof(Category));
+            if (categories[numCategories] == NULL) {
+                printf("Ocurrió un error al asignar memoria.\n");
+                printf("Por favor vuelva a intentarlo.\n");
+                return false;
+            }
+
+            //Assigned memory to the name
+            categories[numCategories]->name = malloc((strlen(sales[i]->category) + 1) * sizeof(char));
+
+
+            //Initialize the data
+            categoryIndex = numCategories;
+            strcpy(categories[categoryIndex]->name, sales[i]->category);
+            categories[categoryIndex]->total = 0;
+            numCategories++;
+        }
+
+        //Adds the total made per category
+        categories[categoryIndex]->total += sales[i]->total;
+    }
+
+    return true;
+}
+
+//Prints the top 5 categories that have been sale
 void estadistic() {
-    printf("Esto es una opcion");
+    //Verify if there are any import in memory
+    if(sales == NULL) {
+        printf("Todav%ca no hay importaciones en memoria.\n", 161);
+        printf("Haga una y vuelva a intentarlo.\n");
+        menu();
+    }
+
+    //Sub menu
+    char o;
+    bool loadData;
+
+    printf("A: Top 5 categor%cas\n", 161);
+    printf("V: Volver\n");
+    printf("Escriba la opci%cn deseada:\n", 162);
+    
+    o = toupper(getchar());
+    cleanBuffer();
+    printf("\n");
+
+    //Switch for different options
+    switch (o)
+    {
+    case 'A':
+        loadData = salesXCategory();
+        if(loadData) {
+            quickSort(0, numCategories - 1);
+            printCategories();
+        }
+        estadistic();
+        break;
+    case 'V':
+        menu();
+
+    default:
+        printf("Opci%cn Invalida. Porfavor vuelva a intentarlo.\n\n", 162);
+        estadistic();
+        break;
+    }
+    
 }
 
 //Saves the data in memory to a json file for 
@@ -816,6 +991,7 @@ void exitProgram() {
     cJSON_Delete(jsonArray);
     cleanMemoryReports();
     cleanMemorySales();
+    cleanMemoryCategories();
 
     printf("ESTA SALEINDO...");
     exit(0);
@@ -828,4 +1004,5 @@ For more understanding of the cJSON libary this video was use for reference:
 https://www.youtube.com/watch?v=0YVrLNhKVc8
 https://www.it.uc3m.es/pbasanta/asng/course_notes/input_output_getline_es.html
 https://www.geeksforgeeks.org/cjson-json-file-write-read-modify-in-c/
+https://www.geeksforgeeks.org/quick-sort-algorithm/
 */
