@@ -751,6 +751,124 @@ void analyzeData() {
 
 }
 
+
+//Temporal analysis functions
+//Calculates and prints the month with most sales in the year that the user ask for
+void mostSalesMonth() {
+    int year;
+    int actualYear;
+    int month;
+    int total = 0;
+
+    //Gets the actual year
+    time_t t = time(NULL);
+    struct tm *actual = localtime(&t);
+    actualYear = actual->tm_year + 1900;
+
+    //Ask for the year
+    printf("Escriba el año deseado para el analisis:\n");
+    scanf("%d", &year);
+    
+    //Limit of the year
+    if(year < 1990 || year > actualYear) {
+        printf("El año puesto no es valido. Porfavor vuelva a intentarlo.\n");
+        return;
+    }
+
+    //Iterate the year
+    for(int i = 0; i < numYearly; i++) {
+        //Verif if the year exist
+        if(years[i]->year == year) {
+            //Iterates the month array
+            for(int j = 0; j < years[i]->monthCounter; j++) {
+                //If the total is greater than or equal to replace the values
+                if(years[i]->months[j].totalMonth > total) {
+                    year = years[i]->year;
+                    month = years[i]->months[j].month;
+                    total = years[i]->months[j].totalMonth;
+                }
+            }
+        }
+    }
+
+    char *monthName;
+    monthName = malloc(strlen(intCharMonth(month)) * sizeof(char));
+    monthName = intCharMonth(month);
+
+    printf("Mes con mayor venta\n");
+    printf("-------------------\n");
+    printf("%s %d: %d\n\n", monthName, year, total);
+    free(monthName);
+}
+
+//Calculates and prints the most active day depending on number of transaccions and quantity
+void mostActiveDay() {
+    int year;
+    int actualYear;
+    int month;
+    int day;
+    int transactions = 0;
+
+    //Gets the actual year
+    time_t t = time(NULL);
+    struct tm *actual = localtime(&t);
+    actualYear = actual->tm_year + 1900;
+
+    //Ask for the year
+    printf("Escriba el año deseado para el analisis:\n");
+    scanf("%d", &year);
+
+    //Limit of the year
+    if(year < 1990 || year > actualYear) {
+        printf("El año puesto no es valido. Porfavor vuelva a intentarlo.\n");
+        return;
+    }
+
+    printf("Escriba el mes deseado para el analisis (Escriba el n%cmero 1-12):\n", 160);
+    scanf("%d", &month);
+
+    //Limit of the month
+    if(month <= 0 || month > 12) {
+        printf("El mes puesto no es valido. Porfavor vuelva a intentarlo.\n");
+        return;
+    }
+
+    //Iterate the year
+    for(int i = 0; i < numYearly; i++) {
+        //Verify if the year exist
+        if(years[i]->year == year) {
+            //Iterates the month array
+            for(int j = 0; j < years[i]->monthCounter; j++) {
+                //Verify if the month exist
+                if(years[i]->months[j].month == month) {
+                    //Iterates the day array
+                    for(int k = 0; k < years[i]->months[j].numDays; k++) {
+                        //If the transaction quantity is greater than or equal to replace the values
+                        if(years[i]->months[j].days->numTransaction > transactions) {
+                            transactions = years[i]->months[j].days->numTransaction;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    char *monthName;
+    monthName = malloc(strlen(intCharMonth(month)) * sizeof(char));
+    strcpy(monthName, intCharMonth(month));
+
+    printf("Mes con mayor venta\n");
+    printf("-------------------\n");
+    //printf("%s %d: %d\n\n", monthName, year, total);
+    free(monthName);
+}
+
+//Calculates the rate of growth or decline by trimester
+void growthDeclineRate() {
+    printf("HELLO OI\n");
+}
+
+//Analyzes sales over a specific period of time
 void temporalAnalysis() {
     printf("Esto es una opcion");
 }
