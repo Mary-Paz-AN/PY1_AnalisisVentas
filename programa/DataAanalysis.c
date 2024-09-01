@@ -92,7 +92,7 @@ void cleanMemoryJson(cJSON *json, char *contentFile) {
 //Cleans the buffer to prevent errors
 void cleanBuffer() {
     int c;
-    while ((c = getchar()) != '\n' && c != EOF);
+    while ((c = getchar()) != '\n');
 }
 
 
@@ -565,7 +565,7 @@ int getYear(const char *date) {
 
 //Calculates the total of sales per month and year and the quantity of transaccions per day od the week
 bool dayMonthYearSales() {   
-    //If the structures are not empty free the memory and restart the counter
+    //If the structures are not empty, free the memory and restart the counter
     if(years != NULL) {
         cleanMemoryReports();
         numYearly = 0;
@@ -574,13 +574,13 @@ bool dayMonthYearSales() {
     //Reserve memory for the structures
     years = malloc(1 * sizeof(YearlyReport*));
     if(years == NULL) {
-        printf("Ocurri%c un erorr a asignar memoria.\n", 162);
-        printf("Porfavor vuelva a intentarlo.\n");
+        printf("Ocurri%c un error al asignar memoria.\n", 162);
+        printf("Por favor vuelva a intentarlo.\n");
         return false;
     }
 
     //Save the data in the structures
-    //Iterates each sale to find the years and months
+    //Iterate through each sale to find the years and months
     for(int i = 0; i < numSales; i++) {
         bool yearExists = false;
         int yearIndex = 0;
@@ -589,7 +589,7 @@ bool dayMonthYearSales() {
         int yearInt = getYear(sales[i]->date);
 
         for(int j = 0; j < numYearly; j++) {
-            //Verify if the year was already add to the array of years
+            //Verify if the year was already added to the array of years
             if(yearInt == years[j]->year) {
                 yearExists = true;
                 yearIndex = j;
@@ -597,7 +597,7 @@ bool dayMonthYearSales() {
             }
         }
 
-        //Adds the year if wasn´t in years
+        //Add the year if it wasn’t in the array of years
         if(!yearExists) {
             //Reallocate memory for the array
             YearlyReport **tempYears = realloc(years, (numYearly + 1) * sizeof(YearlyReport*));
@@ -608,8 +608,8 @@ bool dayMonthYearSales() {
             }
 
             years = tempYears;
-            
-            //Assigned memory for the structure
+
+            //Assign memory for the structure
             years[numYearly] = malloc(sizeof(YearlyReport));
             if (years[numYearly] == NULL) {
                 printf("Ocurrió un error al asignar memoria.\n");
@@ -620,62 +620,40 @@ bool dayMonthYearSales() {
             //Initialize the data
             yearIndex = numYearly;
             years[yearIndex]->year = yearInt;
-            years[yearIndex]->months = NULL;
-            years[yearIndex]->monthCounter = 0;
-            years[yearIndex]->totalYear = 0;
-            numYearly++;
-        }
-
-        bool monthExist = false;
-        int numMonths =years[yearIndex]->monthCounter;
-        int monthIndex = 0;
-
-        //Extract the month from the date 
-        int monthInt = getMonth(sales[i]->date);
-
-        //Verify if the month was already add
-        for(int j = 0; j < numMonths; j++) {
-            //Verify if the year was already add to the array of years
-            if(monthInt == years[yearIndex]->months[j].month) {
-                monthExist = true;
-                monthIndex = j;
-                break;
-            }
-        }
-
-        //Adds the year if wasn´t in years
-        if(!monthExist) {
-            //Reallocate memory for the array
-            MonthlyReport *tempMonths = realloc(years[yearIndex]->months, (numMonths + 1) * sizeof(MonthlyReport));
-            if (tempMonths == NULL) {
-                printf("Ocurrió un error al reasignar memoria para los meses.\n");
+            years[yearIndex]->months = malloc(12 * sizeof(MonthlyReport));
+            if (years[yearIndex]->months == NULL) {
+                printf("Ocurrió un error al asignar memoria para los meses.\n");
                 printf("Por favor vuelva a intentarlo.\n");
                 return false;
             }
 
-            years[yearIndex]->months = tempMonths;
+            //Initialize the array for each month 1
+            for (int m = 0; m < 12; m++) {
+                years[yearIndex]->months[m].month = m + 1;
+                years[yearIndex]->months[m].totalMonth = 0;
+                years[yearIndex]->months[m].days = NULL;
+                years[yearIndex]->months[m].numDays = 0;
+            }
 
-            //Adds data to the month array
-            monthIndex = numMonths; 
-            years[yearIndex]->months[monthIndex].month = monthInt;
-            years[yearIndex]->months[monthIndex].totalMonth = 0;
-            years[yearIndex]->months[monthIndex].days = NULL;
-            years[yearIndex]->months[monthIndex].numDays = 0;
-            years[yearIndex]->monthCounter += 1;
+            years[yearIndex]->monthCounter = 12;
+            years[yearIndex]->totalYear = 0;
+            numYearly++;
+        }
+
+        //Gets the month to adjust the data for each month
+        int monthIndex = getMonth(sales[i]->date) - 1;
+
+        // Extract the day of the week from the date
+        int dayInt = getDay(sales[i]->date);
+        if(dayInt == -1) {
+            return false;
         }
 
         bool dayExists = false;
         int numDays = years[yearIndex]->months[monthIndex].numDays;
         int dayIndex = 0;
 
-        //Extract the day of the week from the date
-        int dayInt = getDay(sales[i]->date);
-
-        if(dayInt == -1) {
-            return false;
-        }
-
-        //Verify if the day already exist
+        // Verify if the day already exists
         for (int k = 0; k < numDays; k++) {
             if (dayInt == years[yearIndex]->months[monthIndex].days[k].day) {
                 dayExists = true;
@@ -684,7 +662,7 @@ bool dayMonthYearSales() {
             }
         }
 
-        // Si no existe, se crea un nuevo DayReport
+        // If the day doesn't exist, create a new DayReport
         if (!dayExists) {
             DayReport *tempDays = realloc(years[yearIndex]->months[monthIndex].days, (numDays + 1) * sizeof(DayReport));
             if (tempDays == NULL) {
@@ -695,16 +673,16 @@ bool dayMonthYearSales() {
 
             years[yearIndex]->months[monthIndex].days = tempDays;
 
-            //Add the data to the days
-            dayIndex = numDays; 
+            // Add the data to the days
+            dayIndex = numDays;
             years[yearIndex]->months[monthIndex].days[dayIndex].day = dayInt;
             years[yearIndex]->months[monthIndex].days[dayIndex].numTransaction = 1;
             years[yearIndex]->months[monthIndex].numDays += 1;
-        } else{
+        } else {
             years[yearIndex]->months[monthIndex].days[dayIndex].numTransaction += 1;
         }
 
-        //Adds the total made per month and year
+        // Add the total made per month and year
         years[yearIndex]->months[monthIndex].totalMonth += sales[i]->total;
         years[yearIndex]->totalYear += sales[i]->total;
     }
@@ -895,7 +873,7 @@ void analyzeData() {
 void mostSalesMonth() {
     int year;
     int actualYear;
-    int month;
+    int month = 0;
     int total = 0;
 
     //Gets the actual year
@@ -920,13 +898,18 @@ void mostSalesMonth() {
             //Iterates the month array
             for(int j = 0; j < years[i]->monthCounter; j++) {
                 //If the total is greater than or equal to replace the values
-                if(years[i]->months[j].totalMonth > total) {
-                    year = years[i]->year;
+                if(years[i]->months[j].totalMonth >= total) {
                     month = years[i]->months[j].month;
                     total = years[i]->months[j].totalMonth;
                 }
             }
         }
+    }
+
+    //Verify if the year exist in the array
+    if(month == 0) {
+        printf("El a%co no fue encontrado. Porfavor vuelva a intentarlo.\n\n", 164);
+        return; 
     }
 
     //Print the moth with the most sales in the year
@@ -940,7 +923,7 @@ void mostActiveDay() {
     int year;
     int actualYear;
     int month;
-    int day;
+    int day = 0;
     int transactions = 0;
 
     //Gets the actual year
@@ -967,14 +950,21 @@ void mostActiveDay() {
         return;
     }
 
+    bool monthExist = false;
+    bool yearExist = false;
+
     //Iterate the year
     for(int i = 0; i < numYearly; i++) {
         //Verify if the year exist
         if(years[i]->year == year) {
+            yearExist = true;
+
             //Iterates the month array
             for(int j = 0; j < years[i]->monthCounter; j++) {
                 //Verify if the month exist
                 if(years[i]->months[j].month == month) {
+                    monthExist = true;
+
                     //Iterates the day array
                     for(int k = 0; k < years[i]->months[j].numDays; k++) {
                         //If the transaction quantity is greater than or equal to replace the values
@@ -989,15 +979,92 @@ void mostActiveDay() {
         }
     }
 
+    //Verify if the month and year exist in the array
+    if(!yearExist) {
+        printf("El a%c no existe. Porfavor vuelva a intentarlo.\n\n", 164);
+    }
+
+    if(!monthExist) {
+        printf("El mes no existe. Porfavor vuelva a intentarlo.\n\n");
+    }
+
     printf("Dia de la semana con m%cs activo\n", 160);
     printf("-------------------------------\n");
     printf("%s de %s del %d\n", intCharDay(day), intCharMonth(month), year);
     printf("Cantidad de transacciones: %d\n\n", transactions);
 }
 
-//Calculates the rate of growth or decline by trimester
+//Calculates the rate of growth or decline by trimester depending on the year
 void growthDeclineRate() {
-    printf("HELLO OI\n");
+    int year;
+    int actualYear;
+    bool existYear = false;
+
+    //Gets the actual year
+    time_t t = time(NULL);
+    struct tm *actual = localtime(&t);
+    actualYear = actual->tm_year + 1900;
+
+    //Ask for the year
+    printf("Escriba el a%co deseado para el an%clisis:\n", 164, 160);
+    scanf("%d", &year);
+
+    //Limit of the year
+    if(year < 1900 || year > actualYear) {
+        printf("El a%co puesto no es valido. Porfavor vuelva a intentarlo.\n", 164);
+        return;
+    }
+
+    //Iterates the year array
+    for(int i = 0; i < numYearly; i++) {
+        //Verify if the year 
+        if(years[i]->year == year) {
+            existYear = true;
+            int trimesterCounter = 1;
+
+            printf("----------------------------------------\n");
+            printf("Crecimiento o decremiento trimestral %d\n", year);
+            printf("----------------------------------------\n");
+
+            //Iterates the month array. It goes from 3 to 3 to calculate the trimester
+            for(int j = 0; j < 10; j += 3) {
+                //Calculate the rate
+                int final = years[i]->months[j + 2].totalMonth;
+                int initial = years[i]->months[j].totalMonth;
+
+                if((initial == 0 && final != 0) || (final == 0 && initial != 0)) {
+                    printf("Trimestre %d: %s un %d%c\n", trimesterCounter, (initial == 0 ? "Crece" : "Decrece"), 100, 37);
+                } 
+                
+                if (initial == 0 && final == 0) {
+                    printf("Trimestre %d: No hay cambios\n", trimesterCounter);
+                }
+                
+                if(initial != 0 && final != 0) {
+                    float p1 = final - initial;
+                    float p2 = p1 / initial;
+                    int rate = p2 * 100;
+
+                    char *state = "Crece";
+
+                    if(rate < 0) {
+                        rate = fabs(rate);
+                        state = "Decrece";
+                    }
+
+                    printf("Trimestre %d: %s un %d%c\n", trimesterCounter, state, rate, 37);
+                }
+
+                trimesterCounter++;
+            }
+
+            printf("\n");
+        }
+    }
+
+    if(!existYear) {
+        printf("No se encuentra el a%co puesto. Porfavor vuelva a intentarlo.\n\n", 164);
+    }
 }
 
 //Analyzes sales over a specific period of time
@@ -1020,21 +1087,20 @@ void temporalAnalysis() {
     switch (o)
     {
     case 'A':
-        //Calculate sales made per year and month
         loadData = dayMonthYearSales();
         if(loadData) { mostSalesMonth(); }
         temporalAnalysis();
         break;
     
     case 'B':
-        //Calculate sales made per year and month
         loadData = dayMonthYearSales();
         if(loadData) { mostActiveDay(); }
         temporalAnalysis();
         break;
 
     case 'C':
-        growthDeclineRate();
+        loadData = dayMonthYearSales();
+        if(loadData) { growthDeclineRate(); }
         temporalAnalysis();
         break;
 

@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <stdbool.h> 
 #include <time.h>
+#include <math.h>
 #include <sys/types.h>
 #include "cJSONLibary/cJSON.h"
 
