@@ -1032,21 +1032,25 @@ void growthDeclineRate() {
                 int final = years[i]->months[j + 2].totalMonth;
                 int initial = years[i]->months[j].totalMonth;
 
+                //In case that one if the values are 0, that means that it change a 100%
                 if((initial == 0 && final != 0) || (final == 0 && initial != 0)) {
                     printf("Trimestre %d: %s un %d%c\n", trimesterCounter, (initial == 0 ? "Crece" : "Decrece"), 100, 37);
                 } 
                 
+                //If both values ​​are 0 it means there were no changes
                 if (initial == 0 && final == 0) {
                     printf("Trimestre %d: No hay cambios\n", trimesterCounter);
                 }
                 
+                //If the both values are difrent from 0 teh normal formula is used
                 if(initial != 0 && final != 0) {
                     float p1 = final - initial;
                     float p2 = p1 / initial;
                     int rate = p2 * 100;
 
-                    char *state = "Crece";
+                    const char *state = "Crece";
 
+                    //If the rate is negative that means that the rate decline
                     if(rate < 0) {
                         rate = fabs(rate);
                         state = "Decrece";
