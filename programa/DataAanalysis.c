@@ -26,6 +26,8 @@ int main() {
     return 0;
 }
 
+
+//Memory associate functions
 //Cleans the memory assigned to the sales array
 void cleanMemorySales() {
     for (int i = 0; i < numSales; i++) {
@@ -38,16 +40,26 @@ void cleanMemorySales() {
     free(sales);
 }
 
-//Cleans the memory assigned to the YearlyReport
+//Cleans the memory assigned to the YearlyReport, MonthlyReport and DayReport
 void cleanMemoryReports() {
-    //Yeraly Report
     for(int i = 0; i < numYearly; i++) {
+
+        //Free each element in MonthlyReport
+        for(int j = 0; j < years[i]->monthCounter; j++) {
+            //Free DayReport
+            free(years[i]->months[j].days);
+        }
+
+        //Free MonthlyReport
         free(years[i]->months);
+
+        //Free each element in years
         free(years[i]);
     }
 
+    //Free YearlyReport
     free(years);
-    years =NULL;
+    years = NULL;
 }
 
 //Cleans the memory assigned to the Category
@@ -77,6 +89,82 @@ void cleanMemoryJson(cJSON *json, char *contentFile) {
     }
 }
 
+//Cleans the buffer to prevent errors
+void cleanBuffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
+
+
+//Main Menu
+void menu() {
+    char o;
+
+    printf("       MEN%c       \n", 233);
+    printf("------------------\n");
+    printf("A: Importar datos\n");
+    printf("B: Procesamiento de datos\n");
+    printf("C: An%clisis de datos\n", 160);
+    printf("D: An%clisis temporal\n", 160);
+    printf("E: Estad%cstica\n", 161);
+    printf("S: Salir\n");
+    printf("Escriba la opci%cn deseada:\n", 162);
+
+    //Convert the char to uppercase in case the user write it in lowercase
+    o = toupper(getchar());
+    cleanBuffer();
+    printf("\n");
+
+    //Switch to access to the functions of the different options
+    switch (o)
+    {
+    case 'A':
+        importData();
+        break;
+    
+    case 'B':
+        verifyInfoInMemory();
+        processData();
+        break;
+
+    case 'C':
+        verifyInfoInMemory();
+        analyzeData();
+        break;
+
+    case 'D':
+        verifyInfoInMemory();
+        temporalAnalysis();
+        break;
+
+    case 'E':
+        verifyInfoInMemory();
+        estadistic();
+        break;
+
+    case 'S':
+        exitProgram();
+        break;
+    
+    default:
+        printf("Opci%cn Invalida. Porfavor vuelva a intentarlo.\n\n", 162);
+        menu();
+        break;
+    }
+
+}
+
+//Verify if there are any import in memory before ejecuting functions other than importData and exit.
+void verifyInfoInMemory() {
+    if(sales == NULL) {
+        printf("Todav%ca no hay importaciones en memoria.\n", 161);
+        printf("Haga una y vuelva a intentarlo.\n");
+        menu();
+    }
+}
+
+
+//Import data functions
 //Load the data in the json file to the struct
 int loadMemory(char *path, int mode) {
     //Open the file nad read it
@@ -356,66 +444,6 @@ int loadMemory(char *path, int mode) {
     return true;
 }
 
-//Cleans the buffer to prevent errors
-void cleanBuffer() {
-    int c;
-    while ((c = getchar()) != '\n' && c != EOF);
-}
-
-//Main Menu
-void menu() {
-    char o;
-
-    printf("       MEN%c       \n", 233);
-    printf("------------------\n");
-    printf("A: Importar datos\n");
-    printf("B: Procesamiento de datos\n");
-    printf("C: An%clisis de datos\n", 160);
-    printf("D: An%clisis temporal\n", 160);
-    printf("E: Estad%cstica\n", 161);
-    printf("S: Salir\n");
-    printf("Escriba la opci%cn deseada:\n", 162);
-
-    //Convert the char to uppercase in case the user write it in lowercase
-    o = toupper(getchar());
-    cleanBuffer();
-    printf("\n");
-
-    //Switch to access to the functions of the different options
-    switch (o)
-    {
-    case 'A':
-        importData();
-        break;
-    
-    case 'B':
-        processData();
-        break;
-
-    case 'C':
-        analyzeData();
-        break;
-
-    case 'D':
-        temporalAnalysis();
-        break;
-
-    case 'E':
-        estadistic();
-        break;
-
-    case 'S':
-        exitProgram();
-        break;
-    
-    default:
-        printf("Opci%cn Invalida. Porfavor vuelva a intentarlo.\n\n", 162);
-        menu();
-        break;
-    }
-
-}
-
 //Imports the data gien a json file to the memory
 void importData() {
     //Submenu for the option
@@ -482,25 +510,62 @@ void importData() {
     menu();
 }
 
+
+//Process data functions
 void processData() {
     printf("Esto es una opcion");
 }
 
-//Calculates the total of sales
-int totalSales() {
-    int total = 0;
 
-    //Iterates the sales array to find the totalof each sale
-    for(int i = 0; i < numSales; i++) {
-        total += sales[i]->total;
+//Day, month, year functions
+//Calculate the day of the week in the date
+int getDay(const char *date) {
+    //Creates a tm structure. Intialize in 0
+    struct tm tm = {0};
+    
+    //Analize the string of date
+    sscanf(date, "%d-%d-%d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday);
+
+    //Adjust year and month
+    tm.tm_year -= 1900;
+    tm.tm_mon -=1;
+
+    //Verify if te conversion works
+    time_t t;
+    t = mktime(&tm);
+    if(t == -1) {
+        return -1;
     }
 
-    return total;
+    //Returns the day in index 0 = domingo - 6 = sabado. Add 1, 1 = domingo - 7 = sabado
+    return tm.tm_wday + 1;
 }
 
-//Calculates the total of sales made monthly and yearly
-bool monthlyYearlySales() {
-    //If the structures are not empty free the memory and restart the counters
+//Calculate the month in the date
+int getMonth(const char *date) {
+    //Creates a tm structure. Intialize in 0
+    struct tm tm = {0};
+    
+    //Analize the string of date
+    sscanf(date, "%d-%d-%d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday);
+
+    return tm.tm_mon;
+}
+
+//Calculate the years in the date
+int getYear(const char *date) {
+    //Creates a tm structure. Intialize in 0
+    struct tm tm = {0};
+    
+    //Analize the string of date
+    sscanf(date, "%d-%d-%d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday);
+
+    return tm.tm_year;
+}
+
+//Calculates the total of sales per month and year and the quantity of transaccions per day od the week
+bool dayMonthYearSales() {   
+    //If the structures are not empty free the memory and restart the counter
     if(years != NULL) {
         cleanMemoryReports();
         numYearly = 0;
@@ -520,8 +585,8 @@ bool monthlyYearlySales() {
         bool yearExists = false;
         int yearIndex = 0;
 
-        //Extract the year from the date and converts the string to int
-        int yearInt = atoi(sales[i]->date);
+        //Extract the year from the date
+        int yearInt = getYear(sales[i]->date);
 
         for(int j = 0; j < numYearly; j++) {
             //Verify if the year was already add to the array of years
@@ -565,8 +630,8 @@ bool monthlyYearlySales() {
         int numMonths =years[yearIndex]->monthCounter;
         int monthIndex = 0;
 
-        //Extract the month from the date and converts striing to int
-        int monthInt = atoi(sales[i]->date + 5);
+        //Extract the month from the date 
+        int monthInt = getMonth(sales[i]->date);
 
         //Verify if the month was already add
         for(int j = 0; j < numMonths; j++) {
@@ -594,7 +659,49 @@ bool monthlyYearlySales() {
             monthIndex = numMonths; 
             years[yearIndex]->months[monthIndex].month = monthInt;
             years[yearIndex]->months[monthIndex].totalMonth = 0;
+            years[yearIndex]->months[monthIndex].days = NULL;
+            years[yearIndex]->months[monthIndex].numDays = 0;
             years[yearIndex]->monthCounter += 1;
+        }
+
+        bool dayExists = false;
+        int numDays = years[yearIndex]->months[monthIndex].numDays;
+        int dayIndex = 0;
+
+        //Extract the day of the week from the date
+        int dayInt = getDay(sales[i]->date);
+
+        if(dayInt == -1) {
+            return false;
+        }
+
+        //Verify if the day already exist
+        for (int k = 0; k < numDays; k++) {
+            if (dayInt == years[yearIndex]->months[monthIndex].days[k].day) {
+                dayExists = true;
+                dayIndex = k;
+                break;
+            }
+        }
+
+        // Si no existe, se crea un nuevo DayReport
+        if (!dayExists) {
+            DayReport *tempDays = realloc(years[yearIndex]->months[monthIndex].days, (numDays + 1) * sizeof(DayReport));
+            if (tempDays == NULL) {
+                printf("Ocurrió un error al reasignar memoria para los días.\n");
+                printf("Por favor vuelva a intentarlo.\n");
+                return false;
+            }
+
+            years[yearIndex]->months[monthIndex].days = tempDays;
+
+            //Add the data to the days
+            dayIndex = numDays; 
+            years[yearIndex]->months[monthIndex].days[dayIndex].day = dayInt;
+            years[yearIndex]->months[monthIndex].days[dayIndex].numTransaction = 1;
+            years[yearIndex]->months[monthIndex].numDays += 1;
+        } else{
+            years[yearIndex]->months[monthIndex].days[dayIndex].numTransaction += 1;
         }
 
         //Adds the total made per month and year
@@ -603,6 +710,116 @@ bool monthlyYearlySales() {
     }
 
     return true;
+}
+
+//Converts the number of the month to the name
+char *intCharMonth(int month) {
+    //Switch month names
+    switch (month)
+    {
+    case 1:
+        return "Enero";
+        break;
+
+    case 2:
+        return "Febrero";
+        break;
+
+    case 3:
+        return "Marzo";
+        break;
+
+    case 4:
+        return "Abril";
+        break;
+
+    case 5:
+        return "Mayo";
+        break;
+
+    case 6:
+        return "Junio";
+        break;
+    
+    case 7:
+        return "Julio";
+        break;
+
+    case 8:
+        return "Agosto";
+        break;
+
+    case 9:
+        return "Septiembre";
+        break;
+
+    case 10:
+        return "Octubre";
+        break;
+
+    case 11:
+        return "Noviembre";
+        break;
+
+    case 12:
+        return "Diciembre";
+        break;
+    
+    default:
+        break;
+    }
+}
+
+//Converts the number of the day to the name
+char *intCharDay(int day) {
+    //Switch month names
+    switch (day)
+    {
+    case 1:
+        return "Domingo";
+        break;
+
+    case 2:
+        return "Lunes";
+        break;
+
+    case 3:
+        return "Martes";
+        break;
+
+    case 4:
+        return "Miercoles";
+        break;
+
+    case 5:
+        return "Jueves";
+        break;
+
+    case 6:
+        return "Viernes";
+        break;
+    
+    case 7:
+        return "Sabado";
+        break;
+
+    default:
+        break;
+    }
+}
+
+
+//Anallyze dat functions
+//Calculates the total of sales
+int totalSales() {
+    int total = 0;
+
+    //Iterates the sales array to find the totalof each sale
+    for(int i = 0; i < numSales; i++) {
+        total += sales[i]->total;
+    }
+
+    return total;
 }
 
 //Prints the sale made monthly and yearly
@@ -618,80 +835,8 @@ void printReport () {
 
         //Months
         for(int j = 0; j < years[i]->monthCounter; j++) {
-            MonthlyReport *monthReport = &(years[i]->months[j]);
-
-            //Switch month names
-            char *monthName;
-            switch (monthReport->month)
-            {
-            case 1:
-                monthName = malloc(strlen("Enero") * sizeof(char));
-                strcpy(monthName, "Enero");
-                break;
-
-            case 2:
-                monthName = malloc(strlen("Febrero") * sizeof(char));
-                strcpy(monthName, "Febrero");
-                break;
-
-            case 3:
-                monthName = malloc(strlen("Marzo") * sizeof(char));
-                strcpy(monthName, "Marzo");
-                break;
-
-            case 4:
-                monthName = malloc(strlen("Abril") * sizeof(char));
-                strcpy(monthName, "Abril");
-                break;
-
-            case 5:
-                monthName = malloc(strlen("Mayo") * sizeof(char));
-                strcpy(monthName, "Mayo");
-                break;
-
-            case 6:
-                monthName = malloc(strlen("Junio") * sizeof(char));
-                strcpy(monthName, "Junio");
-                break;
-            
-            case 7:
-                monthName = malloc(strlen("Julio") * sizeof(char));
-                strcpy(monthName, "Julio");
-                break;
-
-            case 8:
-                monthName = malloc(strlen("Agosto") * sizeof(char));
-                strcpy(monthName, "Agosto");
-                break;
-
-            case 9:
-                monthName = malloc(strlen("Septiembre") * sizeof(char));
-                strcpy(monthName, "Septiembre");
-                break;
-
-            case 10:
-                monthName = malloc(strlen("Octubre") * sizeof(char));
-                strcpy(monthName, "Octubre");
-                break;
-
-            case 11:
-                monthName = malloc(strlen("Noviembre") * sizeof(char));
-                strcpy(monthName, "Noviembre");
-                break;
-
-            case 12:
-                monthName = malloc(strlen("Diciembre") * sizeof(char));
-                strcpy(monthName, "Diciembre");
-                break;
-            
-            default:
-                break;
-            }
-
             //Prints the month and the total per month
-            printf("  %s: %d\n", monthName, monthReport->totalMonth);
-
-            free(monthName);
+            printf("  %s: %d\n", intCharMonth(years[i]->months[j].month), years[i]->months[j].totalMonth);
         }
 
         printf("Total: %d\n", years[i]->totalYear);
@@ -701,22 +846,15 @@ void printReport () {
     printf("\n");
 }
 
-//Makes different statistical analyses of sales
+//Makes different estadistical analyses of sales
 void analyzeData() {
-    //Verify if there are any import in memory
-    if(sales == NULL) {
-        printf("Todav%ca no hay importaciones en memoria.\n", 161);
-        printf("Haga una y vuelva a intentarlo.\n");
-        menu();
-    }
-
     char o;
     int totalSale = 0;
     bool laoadData;
 
     //Submenu for the option
     printf("A: Ver total de ventas\n");
-    printf("B: Ver total de ventas mensaulaes y anuales\n");
+    printf("B: Ver total de ventas mensuales y anuales\n");
     printf("V: Volver\n");
     printf("Escriba la opci%cn deseada:\n", 162);
     
@@ -734,7 +872,7 @@ void analyzeData() {
         break;
     
     case 'B':
-        laoadData = monthlyYearlySales();
+        laoadData = dayMonthYearSales(); 
         if(laoadData){ printReport(); }
         analyzeData();
         break;
@@ -766,12 +904,12 @@ void mostSalesMonth() {
     actualYear = actual->tm_year + 1900;
 
     //Ask for the year
-    printf("Escriba el año deseado para el analisis:\n");
+    printf("Escriba el a%co deseado para el an%clisis:\n", 164, 160);
     scanf("%d", &year);
     
     //Limit of the year
     if(year < 1990 || year > actualYear) {
-        printf("El año puesto no es valido. Porfavor vuelva a intentarlo.\n");
+        printf("El a%co puesto no es valido. Porfavor vuelva a intentarlo.\n", 164);
         return;
     }
 
@@ -791,14 +929,10 @@ void mostSalesMonth() {
         }
     }
 
-    char *monthName;
-    monthName = malloc(strlen(intCharMonth(month)) * sizeof(char));
-    monthName = intCharMonth(month);
-
+    //Print the moth with the most sales in the year
     printf("Mes con mayor venta\n");
     printf("-------------------\n");
-    printf("%s %d: %d\n\n", monthName, year, total);
-    free(monthName);
+    printf("%s %d: %d\n\n", intCharMonth(month), year, total);
 }
 
 //Calculates and prints the most active day depending on number of transaccions and quantity
@@ -815,16 +949,16 @@ void mostActiveDay() {
     actualYear = actual->tm_year + 1900;
 
     //Ask for the year
-    printf("Escriba el año deseado para el analisis:\n");
+    printf("Escriba el a%co deseado para el an%clisis:\n", 164, 160);
     scanf("%d", &year);
 
     //Limit of the year
-    if(year < 1990 || year > actualYear) {
-        printf("El año puesto no es valido. Porfavor vuelva a intentarlo.\n");
+    if(year < 1900 || year > actualYear) {
+        printf("El a%co puesto no es valido. Porfavor vuelva a intentarlo.\n", 164);
         return;
     }
 
-    printf("Escriba el mes deseado para el analisis (Escriba el n%cmero 1-12):\n", 160);
+    printf("Escriba el mes deseado para el an%clisis (Escriba el n%cmero 1-12):\n", 160, 163);
     scanf("%d", &month);
 
     //Limit of the month
@@ -844,8 +978,10 @@ void mostActiveDay() {
                     //Iterates the day array
                     for(int k = 0; k < years[i]->months[j].numDays; k++) {
                         //If the transaction quantity is greater than or equal to replace the values
-                        if(years[i]->months[j].days->numTransaction > transactions) {
-                            transactions = years[i]->months[j].days->numTransaction;
+                        printf("%d", years[i]->months[j].days[k].numTransaction);
+                        if(years[i]->months[j].days[k].numTransaction > transactions) {
+                            transactions = years[i]->months[j].days[k].numTransaction;
+                            day = years[i]->months[j].days[k].day;
                         }
                     }
                 }
@@ -853,14 +989,10 @@ void mostActiveDay() {
         }
     }
 
-    char *monthName;
-    monthName = malloc(strlen(intCharMonth(month)) * sizeof(char));
-    strcpy(monthName, intCharMonth(month));
-
-    printf("Mes con mayor venta\n");
-    printf("-------------------\n");
-    //printf("%s %d: %d\n\n", monthName, year, total);
-    free(monthName);
+    printf("Dia de la semana con m%cs activo\n", 160);
+    printf("-------------------------------\n");
+    printf("%s de %s del %d\n", intCharDay(day), intCharMonth(month), year);
+    printf("Cantidad de transacciones: %d\n\n", transactions);
 }
 
 //Calculates the rate of growth or decline by trimester
@@ -870,9 +1002,55 @@ void growthDeclineRate() {
 
 //Analyzes sales over a specific period of time
 void temporalAnalysis() {
-    printf("Esto es una opcion");
+    char o;
+    bool loadData;
+
+    //Submenu for the option
+    printf("A: Mes con mayor venta\n");
+    printf("B: Dia de la semana m%cs activo\n", 160);
+    printf("C: Tasa de crecimiento o decrecimiento trimestral\n");
+    printf("V: Volver\n");
+    printf("Escriba la opci%cn deseada:\n", 162);
+    
+    o = toupper(getchar());
+    cleanBuffer();
+    printf("\n");
+
+    //Switch to access to the diferent options
+    switch (o)
+    {
+    case 'A':
+        //Calculate sales made per year and month
+        loadData = dayMonthYearSales();
+        if(loadData) { mostSalesMonth(); }
+        temporalAnalysis();
+        break;
+    
+    case 'B':
+        //Calculate sales made per year and month
+        loadData = dayMonthYearSales();
+        if(loadData) { mostActiveDay(); }
+        temporalAnalysis();
+        break;
+
+    case 'C':
+        growthDeclineRate();
+        temporalAnalysis();
+        break;
+
+    case 'V':
+        menu();
+        break;
+
+    default:
+        printf("Opci%cn Invalida. Porfavor vuelva a intentarlo.\n\n", 162);
+        temporalAnalysis();
+        break;
+    }
 }
 
+
+//Estadistic functions
 //Prints the top 5 categories 
 void printCategories() {
     //If the number of categories is less than 5 then just print numCategories
@@ -999,13 +1177,6 @@ bool salesXCategory() {
 
 //Prints the top 5 categories that have been sale
 void estadistic() {
-    //Verify if there are any import in memory
-    if(sales == NULL) {
-        printf("Todav%ca no hay importaciones en memoria.\n", 161);
-        printf("Haga una y vuelva a intentarlo.\n");
-        menu();
-    }
-
     //Sub menu
     char o;
     bool loadData;
@@ -1040,8 +1211,14 @@ void estadistic() {
     
 }
 
+
+//Exit
 //Saves the data in memory to a json file for 
 void exitProgram() {
+    if(sales == NULL) {
+        exit(0);
+    }
+
     //Creates an array to the json object
     cJSON *jsonArray = cJSON_CreateArray();
     if(jsonArray == NULL) {
@@ -1123,4 +1300,5 @@ https://www.youtube.com/watch?v=0YVrLNhKVc8
 https://www.it.uc3m.es/pbasanta/asng/course_notes/input_output_getline_es.html
 https://www.geeksforgeeks.org/cjson-json-file-write-read-modify-in-c/
 https://www.geeksforgeeks.org/quick-sort-algorithm/
+https://nextscenario.com/es/formula-del-porcentaje-de-crecimiento-un-analisis-detallado/#:~:text=La%20f%C3%B3rmula%20para%20calcular%20el,100%20para%20obtener%20el%20porcentaje.
 */

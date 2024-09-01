@@ -9,7 +9,7 @@
 		"total":	500
 	}, {
 		"venta_id":	2,
-		"fecha":	"2023-01-12",
+		"fecha":	"2023-01-04",
 		"producto_id":	106,
 		"producto_nombre":	"Teléfono",
 		"categoria":	"Casa",
@@ -26,7 +26,7 @@
 		"precio_unitario":	500,
 		"total":	500
 	}, {
-		"venta_id":	3,
+		"venta_id":	4,
 		"fecha":	"2024-01-04",
 		"producto_id":	109,
 		"producto_nombre":	"Cámara",
@@ -52,4 +52,40 @@
 		"cantidad":	1,
 		"precio_unitario":	500,
 		"total":	500
+	}, {
+		"venta_id":	7,
+		"fecha":	"2023-12-25",
+		"producto_id":	110,
+		"producto_nombre":	"Laptop",
+		"categoria":	"Electrónica",
+		"cantidad":	1,
+		"precio_unitario":	1000,
+		"total":	1000
+	}, {
+		"venta_id":	8,
+		"fecha":	"2024-12-25",
+		"producto_id":	111,
+		"producto_nombre":	"Tablet",
+		"categoria":	"Electrónica",
+		"cantidad":	2,
+		"precio_unitario":	300,
+		"total":	600
+	}, {
+		"venta_id":	9,
+		"fecha":	"2024-07-07",
+		"producto_id":	112,
+		"producto_nombre":	"Monitor",
+		"categoria":	"Oficina",
+		"cantidad":	1,
+		"precio_unitario":	200,
+		"total":	200
+	}, {
+		"venta_id":	10,
+		"fecha":	"2024-11-11",
+		"producto_id":	113,
+		"producto_nombre":	"Teclado",
+		"categoria":	"Oficina",
+		"cantidad":	2,
+		"precio_unitario":	50,
+		"total":	100
 	}]

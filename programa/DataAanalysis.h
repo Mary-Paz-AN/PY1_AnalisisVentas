@@ -6,6 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h> 
+#include <time.h>
 #include <sys/types.h>
 #include "cJSONLibary/cJSON.h"
 
@@ -24,7 +25,15 @@ typedef struct
 
 typedef struct 
 {
+    int day;
+    int numTransaction;
+} DayReport;
+
+typedef struct 
+{
     int month;
+    DayReport *days;
+    int numDays;
     int totalMonth;
 } MonthlyReport;
 
@@ -56,21 +65,39 @@ void cleanMemorySales();
 void cleanMemoryReports();
 void cleanMemoryCategories();
 void cleanMemoryJson(cJSON *json, char *contentFile);
-
-int loadMemory(char *path, int mode);
 void cleanBuffer();
+
+//Menu
 void menu();
+void verifyInfoInMemory();
+
+//Import data functions
+int loadMemory(char *path, int mode);
 void importData();
 
+//Proceess data functions
 void processData();
 
+//Day, month, year functions
+int getDay(const char *date);
+int getMonth(const char *date);
+int getYear(const char *date);
+bool dayMonthYearSales();
+char *intCharMonth(int month);
+char *intCharDay(int day);
+
+//Analyze data functions
 int totalSales();
-bool monthlyYearlySales();
 void printReport();
 void analyzeData();
 
+//Temporal analysis functions
+void mostSalesMonth();
+void mostActiveDay();
+void growthDeclineRate();
 void temporalAnalysis();
 
+//Estadistic functions
 void printCategories();
 void swap(Category *a, Category *b);
 int partition(int low, int high);
@@ -78,6 +105,7 @@ void quickSort(int low, int high);
 bool salesXCategory();
 void estadistic();
 
+//Exit 
 void exitProgram();
 
 #endif
