@@ -573,7 +573,7 @@ int mode() {
     quant = malloc(sizeof(Quantity*));
     if (quant == NULL) {
         printf("Hubo un error al asignar memoria. Por favor salga y vuelva a intentarlo.\n");
-        return;
+        return -1;
     }
 
     for (int i = 0; i < numSales; i++) {
@@ -601,7 +601,7 @@ int mode() {
                         free(quant[k]);
                     }
                     free(quant);
-                    return;
+                    return -1;
                 }
 
                 quant = tempQuant;
@@ -615,7 +615,7 @@ int mode() {
                         free(quant[k]);
                     }
                     free(quant);
-                    return;
+                    return -1;
                 }
 
                 //Initialize the data
@@ -676,7 +676,42 @@ int average() {
 
 //Edits the sale if the quantity or the unit pice
 void missingData() {
-    
+    bool missingData = false;
+
+    //Iterates the array to find were the quantity,unit price or total is 0
+    for(int i = 0; i < numSales; i++) {
+        //If quantity is 0 the missing data will be replace calculating the mode
+        if(sales[i]->quantity == 0) {
+            int m = mode();
+            
+            //Verify if there was an error
+            if(m == -1) {
+                printf("Hubo un error al calcular la moda.\n");
+                continue;
+            }
+
+            sales[i]->quantity = m;
+            sales[i]->total = 0;
+            printf("Se modific%c la cantidad faltante en la venta con el id %d\n", 162, sales[i]->saleId);
+        }
+
+        //If unit price is 0 the missing data will be replace calculating the average
+        if(sales[i]->unitPrice == 0) {
+            int a = average();
+
+            sales[i]->unitPrice = a;
+            sales[i]->total = 0;
+            printf("Se modific%c el precio unitario faltante en la venta con el id %d\n", 162, sales[i]->saleId);
+        }
+
+        //If toatal is 0 the missing data will be replace by calculating quantity * unitPrice
+        if(sales[i]->total == 0) {
+            int t = sales[i]->quantity * sales[i]->unitPrice; 
+            sales[i]->total = t;
+        }
+    }
+
+    printf("\n");
 }
 
 //Proccess the data the is missing on a sale or if a sale is duplicate
@@ -697,8 +732,7 @@ void processData() {
     switch (o)
     {
     case 'A':
-        //missingData();
-        printf("%d\n", mode());
+        missingData();
         processData();
         break;
     
