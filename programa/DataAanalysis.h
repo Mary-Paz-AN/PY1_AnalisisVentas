@@ -77,6 +77,10 @@ int loadMemory(char *path, int mode);
 void importData();
 
 //Proceess data functions
+void deleteDuplicates();
+int mode();
+int average();
+void missingData();
 void processData();
 
 //Day, month, year functions

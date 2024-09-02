@@ -444,7 +444,7 @@ int loadMemory(char *path, int mode) {
     return true;
 }
 
-//Imports the data gien a json file to the memory
+//Imports the data in a json file to the memory
 void importData() {
     //Submenu for the option
     bool continueImport = true;
@@ -512,8 +512,103 @@ void importData() {
 
 
 //Process data functions
+//If a sale is duplicated, it is deleted and the user is informed which sale it was.
+void deleteDuplicates() {
+    bool duplicate = false;
+
+    //Iterates the array of sales two times to find duplicates
+    for (int i = 0; i < (numSales - 1); i++) {
+        for(int j = (i + 1); j < numSales; j++) {
+            if(sales[i]->saleId == sales[j]->saleId) {
+                //Prints the message for the user
+                printf("Se elimin%c la venta duplicada con el id %d\n", 162, sales[j]->saleId);
+
+                //Free the memory were the element is
+                free(sales[j]->productName);
+                free(sales[j]->date);
+                free(sales[j]->category);
+                free(sales[j]);
+
+                //Move the the remaining elements to the left
+                for(int k = j; k < numSales - 1; k++) {
+                    sales[k] = sales[k + 1];
+                }
+
+                numSales--;
+
+                //Realloc the memory array
+                Sale **tempSales = realloc(sales, numSales * sizeof(Sale*));
+                if(tempSales == NULL) {
+                    printf("Hubo un problema al asignar memoria. Porfavor salga del programa y vuelva a intentarlo.\n\n");
+                    return;
+                }
+
+                sales = tempSales;
+
+                duplicate = true;
+                j--;
+            }
+        }
+    }
+
+    if(!duplicate) {
+        printf("No existen ventas duplicadas.\n");
+    }
+    
+    printf("\n");
+}
+
+//Calculates the mode in terms of quantity of the sales
+int mode() {
+    return 0;
+}
+
+//Calculate the average unit price of sales
+int average() {
+    return 0;
+}
+
+//Edits the sale if the quantity or the unit pice
+void missingData() {
+
+}
+
+//Proccess the data the is missing on a sale or if a sale is duplicate
 void processData() {
-    printf("Esto es una opcion");
+    char o;
+
+    //Submenu for the option
+    printf("A: Completar los datos faltantes\n");
+    printf("B: Eliminar datos duplicados\n");
+    printf("V: Volver\n");
+    printf("Escriba la opci%cn deseada:\n", 162);
+    
+    o = toupper(getchar());
+    cleanBuffer();
+    printf("\n");
+
+    //Switch to access to the diferent options
+    switch (o)
+    {
+    case 'A':
+        missingData();
+        processData();
+        break;
+    
+    case 'B':
+        deleteDuplicates();
+        processData();
+        break;
+
+    case 'V':
+        menu();
+        break;
+
+    default:
+        printf("Opci%cn Invalida. Porfavor vuelva a intentarlo.\n\n", 162);
+        processData();
+        break;
+    }
 }
 
 
@@ -1160,7 +1255,7 @@ int partition(int low, int high) {
 
     //Place the pivot in it´s final position
     swap(categories[i + 1], categories[high]);
-    return i +1;
+    return i + 1;
 }
 
 //Ordes the category array from more earn to less earn with QuickSort
