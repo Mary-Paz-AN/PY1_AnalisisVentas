@@ -692,6 +692,9 @@ void missingData() {
 
             sales[i]->quantity = m;
             sales[i]->total = 0;
+
+            missingData = true;
+
             printf("Se modific%c la cantidad faltante en la venta con el id %d\n", 162, sales[i]->saleId);
         }
 
@@ -701,6 +704,9 @@ void missingData() {
 
             sales[i]->unitPrice = a;
             sales[i]->total = 0;
+
+            missingData = true;
+
             printf("Se modific%c el precio unitario faltante en la venta con el id %d\n", 162, sales[i]->saleId);
         }
 
@@ -711,6 +717,10 @@ void missingData() {
         }
     }
 
+    if(missingData == false) {
+        printf("No se encontr%c ning%cn dato faltante\n", 162, 163);
+    }
+    
     printf("\n");
 }
 
@@ -1598,13 +1608,3 @@ void exitProgram() {
     exit(0);
 }
 
-
-/*
-C:/Users/maryp/OneDrive/Documentos/TEC/SEMESTRE/LENGUAJES/historicoVentas.json
-For more understanding of the cJSON libary this video was use for reference:
-https://www.youtube.com/watch?v=0YVrLNhKVc8
-https://www.it.uc3m.es/pbasanta/asng/course_notes/input_output_getline_es.html
-https://www.geeksforgeeks.org/cjson-json-file-write-read-modify-in-c/
-https://www.geeksforgeeks.org/quick-sort-algorithm/
-https://nextscenario.com/es/formula-del-porcentaje-de-crecimiento-un-analisis-detallado/#:~:text=La%20f%C3%B3rmula%20para%20calcular%20el,100%20para%20obtener%20el%20porcentaje.
-*/
