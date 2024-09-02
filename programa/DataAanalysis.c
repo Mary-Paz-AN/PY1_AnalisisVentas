@@ -560,17 +560,123 @@ void deleteDuplicates() {
 
 //Calculates the mode in terms of quantity of the sales
 int mode() {
-    return 0;
+    //Createsa structure
+    typedef struct {
+        int number;
+        int counter;
+    } Quantity;
+
+    Quantity **quant;
+    int numQuantity = 0;
+
+    //Assigned memory to the array
+    quant = malloc(sizeof(Quantity*));
+    if (quant == NULL) {
+        printf("Hubo un error al asignar memoria. Por favor salga y vuelva a intentarlo.\n");
+        return;
+    }
+
+    for (int i = 0; i < numSales; i++) {
+        bool quantityExist = false;
+        int index = 0;
+
+        //Verify if the quantity is different from 0
+        if (sales[i]->quantity != 0) {
+            //Verify if the quantity was already add
+            for (int j = 0; j < numQuantity; j++) {
+                if (sales[i]->quantity == quant[j]->number) {
+                    quantityExist = true;
+                    index = j;
+                    break;
+                }
+            }
+
+            //Adds the quantity to the array
+            if (!quantityExist) {
+                Quantity **tempQuant = realloc(quant, (numQuantity + 1) * sizeof(Quantity*));
+                if (tempQuant == NULL) {
+                    printf("Hubo un error al reasignar la memoria. Por favor salga del programa y vuelva a intentarlo.\n");
+              
+                    for (int k = 0; k < numQuantity; k++) {
+                        free(quant[k]);
+                    }
+                    free(quant);
+                    return;
+                }
+
+                quant = tempQuant;
+
+                // Asigna memoria para el nuevo elemento
+                quant[numQuantity] = malloc(sizeof(Quantity));
+                if (quant[numQuantity] == NULL) {
+                    printf("Hubo un problema al asignar memoria. Por favor salga del programa y vuelva a intentarlo.\n");
+                    
+                    for (int k = 0; k < numQuantity; k++) {
+                        free(quant[k]);
+                    }
+                    free(quant);
+                    return;
+                }
+
+                //Initialize the data
+                quant[numQuantity]->number = sales[i]->quantity;
+                quant[numQuantity]->counter = 1;
+                numQuantity++;
+            } else {
+                //Add 1 to the counter
+                quant[index]->counter++;
+            }
+        }
+    }
+
+    //Calculates the mode
+    int mode = 0;
+    int cMode = 0;
+
+    //Iterates the array to find the mode
+    for (int i = 0; i < numQuantity; i++) {
+        if (quant[i]->counter >= cMode) {
+            cMode = quant[i]->counter;
+            mode = quant[i]->number;
+        }
+    }
+    
+    //Free memory
+    for (int i = 0; i < numQuantity; i++) {
+        free(quant[i]);
+    }
+    free(quant);
+
+    return mode;
 }
 
 //Calculate the average unit price of sales
 int average() {
-    return 0;
+    int sum = 0;
+    int counter = 0;
+
+    //Iterate the array seeking were the unit price is different from 0
+    for(int i = 0; i < numSales; i++) {
+        if(sales[i]->unitPrice != 0) {
+            sum += sales[i]->unitPrice;
+            counter++;
+        }
+    }
+
+    //In case that there are no unit prices different from 0
+    if(counter == 0) {
+        return 0;
+    }
+
+    //Calculate the average
+    int average = sum / counter;
+
+    return average;
 }
 
 //Edits the sale if the quantity or the unit pice
 void missingData() {
-
+    
 }
 
 //Proccess the data the is missing on a sale or if a sale is duplicate
@@ -591,7 +697,8 @@ void processData() {
     switch (o)
     {
     case 'A':
-        missingData();
+        //missingData();
+        printf("%d\n", mode());
         processData();
         break;
     

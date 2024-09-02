@@ -5,7 +5,7 @@
 		"producto_nombre":	"Cámara",
 		"categoria":	"Mascotas",
 		"cantidad":	2,
-		"precio_unitario":	250,
+		"precio_unitario":	0,
 		"total":	500
 	}, {
 		"venta_id":	2,
@@ -86,7 +86,7 @@
 		"producto_nombre":	"Teclado",
 		"categoria":	"Oficina",
 		"cantidad":	2,
-		"precio_unitario":	50,
+		"precio_unitario":	0,
 		"total":	100
 	}, {
 		"venta_id":	11,
